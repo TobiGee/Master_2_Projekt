@@ -1,48 +1,42 @@
-def totalvalue(comb):
-    ' berechne Gewicht und Wertigkeit einer Kombination
-    totwt = totval = 0
-    for item, wt, val in comb:
-        totwt  += wt
-        totval += val
-    return (totval, -totwt) if totwt <= 400 else (0, 0)
+import urllib
+import requests
+import numpy as np
+import math
 
-items = (
-    ("map", 9, 150), ("compass", 13, 35), ("water", 153, 200), ("sandwich", 50, 160),
-    ("glucose", 15, 60), ("tin", 68, 45), ("banana", 27, 60), ("apple", 39, 40),
-    ("cheese", 23, 30), ("beer", 52, 10), ("suntan cream", 11, 70), ("camera", 32, 30),
-    ("t-shirt", 24, 15), ("trousers", 48, 10), ("umbrella", 73, 40),
-    ("waterproof trousers", 42, 70), ("waterproof overclothes", 43, 75),
-    ("note-case", 22, 80), ("sunglasses", 7, 20), ("towel", 18, 12),
-    ("socks", 4, 50), ("book", 30, 10),
-    )
+f = open("tsp01.data","r")
+points = []
+#Berechnet die Distanz zwischen zwei Punkten
+def distance(p,q):
+    return math.sqrt((p[0]-q[0])**2+(p[1]-q[1])**2)
+for el in f.readlines():
+    #Einlesen der Punkte
+    points.append([float(el.split()[0]),float(el.split()[1]), False]) #False signalisiert, dass Punkt nicht besucht wurde.
+#Neigrest Neigbor
 
-def knapsack01_dp(items, limit):
-    table = [[0 for w in range(limit + 1)] for j in xrange(len(items) + 1)]
-
-    for j in xrange(1, len(items) + 1):
-        item, wt, val = items[j-1]
-        for w in xrange(1, limit + 1):
-            if wt > w:
-                table[j][w] = table[j-1][w]
-            else:
-                table[j][w] = max(table[j-1][w],
-                                  table[j-1][w-wt] + val)
-
-    result = []
-    w = limit
-    for j in range(len(items), 0, -1):
-        was_added = table[j][w] != table[j-1][w]
-
-        if was_added:
-            item, wt, val = items[j-1]
-            result.append(items[j-1])
-            w -= wt
-
-    return result
-
-
-bagged = knapsack01_dp(items, 400)
-print("Bagged the following items\n  " +
-      '\n  '.join(sorted(item for item,_,_ in bagged)))
-val, wt = totalvalue(bagged)
-print("for a total value of %i and a total weight of %i" % (val, -wt))
+#starte beim ersten Element
+indexAktiv = 0
+nextPoint = 0
+reihenfolge = [0]
+while True:
+    points[indexAktiv][2] = True
+    #berechne distanz
+    nextDis = 0
+    tmpDis = 1000000
+    shouldBreak = True
+    for el in range(len(points)):
+        #print("")
+        #print(reihenfolge)
+        if(not points[el][2]):
+            shouldBreak = False
+            nextDis = distance(points[indexAktiv],points[el])
+            #print(nextDis)
+            if(nextDis<tmpDis):
+                tmpDis = nextDis
+                nextPoint = el
+                print(el)
+    if shouldBreak:
+        break
+    points[nextPoint][2] = True
+    reihenfolge.append(nextPoint)
+print(reihenfolge)
+f.close()
